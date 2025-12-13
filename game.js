@@ -19,25 +19,23 @@ const UI = {
 function img(src){ const i=new Image(); i.src=src; return i; }
 
 const ASSETS = {
-  knight: img('assets/sprites/knight.png'),
+  knight: img('assets/sprites/knight.png'), // sprite sheet
   goblin: img('assets/sprites/goblin.png'),
   demon: img('assets/sprites/demon.png'),
   wizard: img('assets/sprites/wizard.png'),
   angel: img('assets/sprites/angel.png'),
   sword: img('assets/sprites/sword.png'),
-  orb: img('assets/sprites/wizard-drop.png'),
-  angelOrb: img('assets/sprites/angel-drop.png'),
 };
 
 /* ================= INPUT ================= */
 const KEY = {};
-addEventListener('keydown', e=>{
+addEventListener('keydown', e => {
   KEY[e.key.toLowerCase()] = true;
   if(e.key==='1') useItem(0);
   if(e.key==='2') useItem(1);
   if(e.key.toLowerCase()==='r' && state.gameOver) resetGame();
 });
-addEventListener('keyup', e=>KEY[e.key.toLowerCase()] = false);
+addEventListener('keyup', e => KEY[e.key.toLowerCase()] = false);
 
 /* ================= WORLD ================= */
 const world = {
@@ -88,7 +86,6 @@ const state={
   gameOver:false,
   enemies:[],
   projectiles:[],
-  drops:[],
   items:[null,null],
   orbEffectTimer:0,
   spawnTimer:0,
@@ -118,7 +115,7 @@ function rebuildHUD(){
 function resetGame(){
   Object.assign(state,{
     started:true,gameOver:false,
-    enemies:[],projectiles:[],drops:[],
+    enemies:[],projectiles:[],
     items:[null,null],
     orbEffectTimer:0,
     spawnTimer:0,kills:0,healCounter:0
@@ -134,22 +131,16 @@ function resetGame(){
 }
 UI.btnStart.onclick=resetGame;
 
-/* ================= ITEM SYSTEM ================= */
+/* ================= ITEMS ================= */
 function addItem(type){
   if(!state.items[0]) state.items[0]=type;
   else if(!state.items[1]) state.items[1]=type;
 }
-
 function useItem(slot){
-  const item=state.items[slot];
-  if(!item) return;
-
-  if(item==='wizard'){
-    state.orbEffectTimer=300;
-  }
-  if(item==='angel'){
-    state.enemies.length=0;
-  }
+  const it=state.items[slot];
+  if(!it) return;
+  if(it==='wizard') state.orbEffectTimer=300;
+  if(it==='angel') state.enemies.length=0;
   state.items[slot]=null;
 }
 
@@ -158,9 +149,9 @@ function spawnEnemy(){
   const side=Math.random()<0.5?-1:1;
   const r=Math.random();
   let type='goblin';
-  if(r>0.85) type='demon';
-  if(r>0.95) type='wizard';
-  if(r>0.985) type='angel';
+  if(r>0.75) type='demon';
+  if(r>0.93) type='wizard';
+  if(r>0.98) type='angel';
 
   state.enemies.push({
     type,
@@ -177,11 +168,12 @@ function enemyAI(e,dt){
   const px=player.x+player.w/2;
   const ex=e.x+e.w/2;
   const dir=px>ex?1:-1;
+
   e.facing=dir;
   e.vx+=dir*(e.type==='angel'?0.3:0.4);
   e.vx=clamp(e.vx,-2,2);
 
-  if(e.onGround&&e.jumpCd<=0&&player.y+player.h<e.y-28&&Math.abs(px-ex)<160){
+  if(e.onGround&&e.jumpCd<=0&&player.y+player.h<e.y-32&&Math.abs(px-ex)<160){
     e.vy=-15;
     e.jumpCd=90;
   }
@@ -215,13 +207,31 @@ function swordSlash(){
   rebuildHUD();
 }
 
+function throwSword(){
+  if(player.atkCd>0||player.energy<=0) return;
+  player.atkCd=25;
+  player.energy--;
+
+  state.projectiles.push({
+    x:player.x+player.w/2,
+    y:player.y+14,
+    vx:player.facing*8,
+    vy:-1,
+    w:18,h:18,
+    life:90,rot:0
+  });
+  rebuildHUD();
+}
+
 /* ================= UPDATE ================= */
 function update(dt){
   if(KEY['arrowleft']){player.vx-=0.9;player.facing=-1;}
   if(KEY['arrowright']){player.vx+=0.9;player.facing=1;}
   if(KEY['arrowup']&&player.onGround) player.vy=-16;
   if(KEY['z']) swordSlash();
+  if(KEY['x']) throwSword();
 
+  // energy regen
   player.energyTimer+=dt;
   if(player.energyTimer>=90){
     player.energyTimer=0;
@@ -273,20 +283,64 @@ function update(dt){
       }
     }
   }
+
+  for(let i=state.projectiles.length-1;i>=0;i--){
+    const p=state.projectiles[i];
+    p.vy+=0.2;
+    p.x+=p.vx;
+    p.y+=p.vy;
+    p.rot+=0.3;
+    p.life--;
+    for(const e of state.enemies){
+      if(aabb(p,e)){ e.hp-=2; p.life=0; }
+    }
+    if(p.life<=0) state.projectiles.splice(i,1);
+  }
 }
 
 /* ================= DRAW ================= */
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
+
   ctx.fillStyle='#333';
   world.platforms.forEach(p=>ctx.fillRect(p.x,p.y,p.w,p.h));
 
-  drawSprite(ASSETS.knight,player,2.1);
+  drawPlayer();
+
+  if(player.slashTimer>0){
+    ctx.save();
+    ctx.translate(player.x+(player.facing===1?player.w+20:-20),player.y+player.h/2);
+    ctx.scale(player.facing,1);
+    ctx.drawImage(ASSETS.sword,-16,-16,32,32);
+    ctx.restore();
+  }
 
   state.enemies.forEach(e=>{
     const img=e.type==='angel'?ASSETS.angel:e.type==='wizard'?ASSETS.wizard:e.type==='demon'?ASSETS.demon:ASSETS.goblin;
     drawSprite(img,e,2);
   });
+
+  state.projectiles.forEach(p=>{
+    ctx.save();
+    ctx.translate(p.x,p.y);
+    ctx.rotate(p.rot);
+    ctx.drawImage(ASSETS.sword,-12,-12,24,24);
+    ctx.restore();
+  });
+}
+
+function drawPlayer(){
+  if(!ASSETS.knight.complete) return;
+  const s=2.1;
+  ctx.save();
+  ctx.translate(player.x+player.w/2,player.y+player.h/2);
+  ctx.scale(player.facing,1);
+  ctx.drawImage(
+    ASSETS.knight,
+    0,0,32,32,
+    -16*s,-16*s,32*s,32*s
+  );
+  ctx.restore();
 }
 
 function drawSprite(img,o,s){
