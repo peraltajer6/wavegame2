@@ -22,28 +22,34 @@ const ASSETS = {
   knight: img('assets/sprites/knight.png'),
   goblin: img('assets/sprites/goblin.png'),
   demon: img('assets/sprites/demon.png'),
+  wizard: img('assets/sprites/wizard.png'),
+  angel: img('assets/sprites/angel.png'),
   sword: img('assets/sprites/sword.png'),
+  orb: img('assets/sprites/wizard-drop.png'),
+  angelOrb: img('assets/sprites/angel-drop.png'),
 };
 
 /* ================= INPUT ================= */
 const KEY = {};
-addEventListener('keydown', e => {
+addEventListener('keydown', e=>{
   KEY[e.key.toLowerCase()] = true;
-  if (e.key.toLowerCase() === 'r' && state.gameOver) resetGame();
+  if(e.key==='1') useItem(0);
+  if(e.key==='2') useItem(1);
+  if(e.key.toLowerCase()==='r' && state.gameOver) resetGame();
 });
-addEventListener('keyup', e => KEY[e.key.toLowerCase()] = false);
+addEventListener('keyup', e=>KEY[e.key.toLowerCase()] = false);
 
 /* ================= WORLD ================= */
 const world = {
   gravity: 0.9,
   friction: 0.82,
   platforms: [
-    {x:0, y:480, w:960, h:60},
-    {x:110, y:380, w:200, h:18},
-    {x:390, y:320, w:180, h:18},
-    {x:640, y:380, w:210, h:18},
-    {x:260, y:240, w:180, h:18},
-    {x:520, y:210, w:170, h:18},
+    {x:0,y:480,w:960,h:60},
+    {x:110,y:380,w:200,h:18},
+    {x:390,y:320,w:180,h:18},
+    {x:640,y:380,w:210,h:18},
+    {x:260,y:240,w:180,h:18},
+    {x:520,y:210,w:170,h:18},
   ]
 };
 
@@ -82,6 +88,9 @@ const state={
   gameOver:false,
   enemies:[],
   projectiles:[],
+  drops:[],
+  items:[null,null],
+  orbEffectTimer:0,
   spawnTimer:0,
   kills:0,
   healCounter:0
@@ -93,9 +102,7 @@ function rebuildHUD(){
   for(let i=0;i<5;i++){
     const s=document.createElement('span');
     s.textContent='♥';
-    s.className=
-      i*2+2<=player.hpHalf?'heart full':
-      i*2+1===player.hpHalf?'heart half':'heart empty';
+    s.className=i*2+2<=player.hpHalf?'heart full':i*2+1===player.hpHalf?'heart half':'heart empty';
     UI.hearts.appendChild(s);
   }
   UI.energy.innerHTML='';
@@ -109,41 +116,59 @@ function rebuildHUD(){
 
 /* ================= START / RESET ================= */
 function resetGame(){
-  state.started=true;
-  state.gameOver=false;
-  state.enemies.length=0;
-  state.projectiles.length=0;
-  state.spawnTimer=0;
-  state.kills=0;
-  state.healCounter=0;
-
+  Object.assign(state,{
+    started:true,gameOver:false,
+    enemies:[],projectiles:[],drops:[],
+    items:[null,null],
+    orbEffectTimer:0,
+    spawnTimer:0,kills:0,healCounter:0
+  });
   Object.assign(player,{
     x:120,y:200,vx:0,vy:0,
     hpHalf:10,energy:6,
-    energyTimer:0,
-    atkCd:0,invuln:0,slashTimer:0
+    energyTimer:0,atkCd:0,invuln:0,slashTimer:0
   });
-
   UI.start.classList.add('hidden');
   UI.gameover.classList.add('hidden');
   rebuildHUD();
 }
 UI.btnStart.onclick=resetGame;
 
+/* ================= ITEM SYSTEM ================= */
+function addItem(type){
+  if(!state.items[0]) state.items[0]=type;
+  else if(!state.items[1]) state.items[1]=type;
+}
+
+function useItem(slot){
+  const item=state.items[slot];
+  if(!item) return;
+
+  if(item==='wizard'){
+    state.orbEffectTimer=300;
+  }
+  if(item==='angel'){
+    state.enemies.length=0;
+  }
+  state.items[slot]=null;
+}
+
 /* ================= ENEMY SPAWN ================= */
 function spawnEnemy(){
   const side=Math.random()<0.5?-1:1;
-  const type=Math.random()<0.6?'goblin':'demon';
+  const r=Math.random();
+  let type='goblin';
+  if(r>0.85) type='demon';
+  if(r>0.95) type='wizard';
+  if(r>0.985) type='angel';
 
   state.enemies.push({
     type,
     x:side===-1?10:canvas.width-44,
     y:420,w:34,h:38,
     vx:0,vy:0,facing:side===-1?1:-1,
-    hp:type==='demon'?4:3,
-    onGround:false,
-    jumpCd:0,
-    attackCd:0
+    hp:type==='angel'?6:type==='wizard'?5:type==='demon'?4:3,
+    onGround:false,jumpCd:0,attackCd:0
   });
 }
 
@@ -152,25 +177,17 @@ function enemyAI(e,dt){
   const px=player.x+player.w/2;
   const ex=e.x+e.w/2;
   const dir=px>ex?1:-1;
-
   e.facing=dir;
-  e.vx+=dir*(e.type==='demon'?0.5:0.4);
-  e.vx=clamp(e.vx,-2.2,2.2);
+  e.vx+=dir*(e.type==='angel'?0.3:0.4);
+  e.vx=clamp(e.vx,-2,2);
 
-  // smarter jumping
-  if(
-    e.onGround &&
-    e.jumpCd<=0 &&
-    player.y+player.h < e.y-20 &&
-    Math.abs(px-ex)<180
-  ){
+  if(e.onGround&&e.jumpCd<=0&&player.y+player.h<e.y-28&&Math.abs(px-ex)<160){
     e.vy=-15;
-    e.jumpCd=60;
+    e.jumpCd=90;
   }
 
-  // attack cooldown
   e.attackCd=Math.max(0,e.attackCd-dt);
-  if(Math.abs(px-ex)<28 && Math.abs(player.y-e.y)<40 && e.attackCd<=0){
+  if(Math.abs(px-ex)<28&&Math.abs(player.y-e.y)<40&&e.attackCd<=0){
     if(player.invuln<=0){
       player.hpHalf--;
       player.invuln=40;
@@ -180,7 +197,7 @@ function enemyAI(e,dt){
         UI.gameover.classList.remove('hidden');
       }
     }
-    e.attackCd=50;
+    e.attackCd=60;
   }
 }
 
@@ -191,34 +208,10 @@ function swordSlash(){
   player.energy--;
   player.slashTimer=8;
 
-  const hit={
-    x:player.x+(player.facing===1?player.w:-50),
-    y:player.y+6,w:50,h:26
-  };
-
+  const hit={x:player.x+(player.facing===1?player.w:-50),y:player.y+6,w:50,h:26};
   for(const e of state.enemies){
-    if(aabb(hit,e)){
-      e.hp-=2;
-      e.vx+=player.facing*4;
-      e.vy=-6;
-    }
+    if(aabb(hit,e)){ e.hp-=2; e.vx+=player.facing*4; e.vy=-6; }
   }
-  rebuildHUD();
-}
-
-function throwSword(){
-  if(player.atkCd>0||player.energy<=0) return;
-  player.atkCd=25;
-  player.energy--;
-
-  state.projectiles.push({
-    x:player.x+player.w/2,
-    y:player.y+14,
-    vx:player.facing*8,
-    vy:-1,
-    w:18,h:18,
-    life:90,rot:0
-  });
   rebuildHUD();
 }
 
@@ -227,11 +220,8 @@ function update(dt){
   if(KEY['arrowleft']){player.vx-=0.9;player.facing=-1;}
   if(KEY['arrowright']){player.vx+=0.9;player.facing=1;}
   if(KEY['arrowup']&&player.onGround) player.vy=-16;
-
   if(KEY['z']) swordSlash();
-  if(KEY['x']) throwSword();
 
-  // energy regen
   player.energyTimer+=dt;
   if(player.energyTimer>=90){
     player.energyTimer=0;
@@ -243,7 +233,6 @@ function update(dt){
   player.x+=player.vx*dt;
   player.y+=player.vy*dt;
   player.vx*=Math.pow(world.friction,dt);
-
   resolvePlatforms(player,dt);
 
   player.atkCd=Math.max(0,player.atkCd-dt);
@@ -256,18 +245,23 @@ function update(dt){
     state.spawnTimer=120;
   }
 
+  if(state.orbEffectTimer>0){
+    state.orbEffectTimer--;
+    for(const e of state.enemies) e.hp-=0.03;
+  }
+
   for(let i=state.enemies.length-1;i>=0;i--){
     const e=state.enemies[i];
     enemyAI(e,dt);
     e.jumpCd=Math.max(0,e.jumpCd-dt);
-
     e.vy+=world.gravity*dt;
     e.x+=e.vx*dt;
     e.y+=e.vy*dt;
-
     resolvePlatforms(e,dt);
 
     if(e.hp<=0){
+      if(e.type==='wizard') addItem('wizard');
+      if(e.type==='angel') addItem('angel');
       state.enemies.splice(i,1);
       state.kills++;
       UI.killNum.textContent=state.kills;
@@ -279,63 +273,20 @@ function update(dt){
       }
     }
   }
-
-  for(let i=state.projectiles.length-1;i>=0;i--){
-    const p=state.projectiles[i];
-    p.vy+=0.2;
-    p.x+=p.vx;
-    p.y+=p.vy;
-    p.rot+=0.3;
-    p.life--;
-
-    for(const e of state.enemies){
-      if(aabb(p,e)){ e.hp-=2; p.life=0; }
-    }
-    if(p.life<=0) state.projectiles.splice(i,1);
-  }
 }
 
 /* ================= DRAW ================= */
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-
   ctx.fillStyle='#333';
   world.platforms.forEach(p=>ctx.fillRect(p.x,p.y,p.w,p.h));
 
-  drawPlayer();
-
-  if(player.slashTimer>0){
-    ctx.save();
-    ctx.translate(
-      player.x+(player.facing===1?player.w+20:-20),
-      player.y+player.h/2
-    );
-    ctx.scale(player.facing,1);
-    ctx.drawImage(ASSETS.sword,-16,-16,32,32);
-    ctx.restore();
-  }
+  drawSprite(ASSETS.knight,player,2.1);
 
   state.enemies.forEach(e=>{
-    drawSprite(e.type==='demon'?ASSETS.demon:ASSETS.goblin,e,2);
+    const img=e.type==='angel'?ASSETS.angel:e.type==='wizard'?ASSETS.wizard:e.type==='demon'?ASSETS.demon:ASSETS.goblin;
+    drawSprite(img,e,2);
   });
-
-  state.projectiles.forEach(p=>{
-    ctx.save();
-    ctx.translate(p.x,p.y);
-    ctx.rotate(p.rot);
-    ctx.drawImage(ASSETS.sword,-12,-12,24,24);
-    ctx.restore();
-  });
-}
-
-function drawPlayer(){
-  if(!ASSETS.knight.complete) return;
-  const s=2.1;
-  ctx.save();
-  ctx.translate(player.x+player.w/2,player.y+player.h/2);
-  ctx.scale(player.facing,1);
-  ctx.drawImage(ASSETS.knight,0,0,32,32,-16*s,-16*s,32*s,32*s);
-  ctx.restore();
 }
 
 function drawSprite(img,o,s){
