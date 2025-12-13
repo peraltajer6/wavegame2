@@ -16,11 +16,7 @@ const UI = {
 };
 
 /* ================= ASSETS ================= */
-function img(src){
-  const i = new Image();
-  i.src = src;
-  return i;
-}
+function img(src){ const i=new Image(); i.src=src; return i; }
 
 const ASSETS = {
   knight: img('assets/sprites/knight.png'),
@@ -53,9 +49,7 @@ const world = {
 
 /* ================= HELPERS ================= */
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-const aabb=(a,b)=>
-  a.x<b.x+b.w && a.x+a.w>b.x &&
-  a.y<b.y+b.h && a.y+a.h>b.y;
+const aabb=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
 
 /* ================= PLATFORM COLLISION ================= */
 function resolvePlatforms(b,dt){
@@ -63,7 +57,7 @@ function resolvePlatforms(b,dt){
   for(const p of world.platforms){
     if(b.x+b.w<=p.x||b.x>=p.x+p.w) continue;
     const prevBottom=b.y+b.h-b.vy*dt;
-    if(b.vy>=0 && prevBottom<=p.y && b.y+b.h>=p.y){
+    if(b.vy>=0&&prevBottom<=p.y&&b.y+b.h>=p.y){
       b.y=p.y-b.h;
       b.vy=0;
       b.onGround=true;
@@ -77,6 +71,7 @@ const player={
   vx:0,vy:0,facing:1,onGround:false,
   hpHalf:10,maxHpHalf:10,
   energy:6,maxEnergy:6,
+  energyTimer:0,
   atkCd:0,invuln:0,
   slashTimer:0
 };
@@ -125,6 +120,7 @@ function resetGame(){
   Object.assign(player,{
     x:120,y:200,vx:0,vy:0,
     hpHalf:10,energy:6,
+    energyTimer:0,
     atkCd:0,invuln:0,slashTimer:0
   });
 
@@ -143,35 +139,48 @@ function spawnEnemy(){
     type,
     x:side===-1?10:canvas.width-44,
     y:420,w:34,h:38,
-    vx:0,vy:0,
-    facing:side===-1?1:-1,
+    vx:0,vy:0,facing:side===-1?1:-1,
     hp:type==='demon'?4:3,
-    onGround:false
+    onGround:false,
+    jumpCd:0,
+    attackCd:0
   });
 }
 
 /* ================= ENEMY AI ================= */
-function enemyAI(e){
+function enemyAI(e,dt){
   const px=player.x+player.w/2;
   const ex=e.x+e.w/2;
   const dir=px>ex?1:-1;
 
   e.facing=dir;
-  e.vx+=dir*(e.type==='demon'?0.55:0.45);
-  e.vx=clamp(e.vx,-2.4,2.4);
+  e.vx+=dir*(e.type==='demon'?0.5:0.4);
+  e.vx=clamp(e.vx,-2.2,2.2);
 
-  if(e.onGround && player.y+player.h<e.y && Math.abs(px-ex)<180){
+  // smarter jumping
+  if(
+    e.onGround &&
+    e.jumpCd<=0 &&
+    player.y+player.h < e.y-20 &&
+    Math.abs(px-ex)<180
+  ){
     e.vy=-15;
+    e.jumpCd=60;
   }
 
-  if(Math.abs(px-ex)<28 && player.invuln<=0){
-    player.hpHalf--;
-    player.invuln=40;
-    rebuildHUD();
-    if(player.hpHalf<=0){
-      state.gameOver=true;
-      UI.gameover.classList.remove('hidden');
+  // attack cooldown
+  e.attackCd=Math.max(0,e.attackCd-dt);
+  if(Math.abs(px-ex)<28 && Math.abs(player.y-e.y)<40 && e.attackCd<=0){
+    if(player.invuln<=0){
+      player.hpHalf--;
+      player.invuln=40;
+      rebuildHUD();
+      if(player.hpHalf<=0){
+        state.gameOver=true;
+        UI.gameover.classList.remove('hidden');
+      }
     }
+    e.attackCd=50;
   }
 }
 
@@ -218,8 +227,17 @@ function update(dt){
   if(KEY['arrowleft']){player.vx-=0.9;player.facing=-1;}
   if(KEY['arrowright']){player.vx+=0.9;player.facing=1;}
   if(KEY['arrowup']&&player.onGround) player.vy=-16;
+
   if(KEY['z']) swordSlash();
   if(KEY['x']) throwSword();
+
+  // energy regen
+  player.energyTimer+=dt;
+  if(player.energyTimer>=90){
+    player.energyTimer=0;
+    player.energy=Math.min(player.maxEnergy,player.energy+1);
+    rebuildHUD();
+  }
 
   player.vy+=world.gravity*dt;
   player.x+=player.vx*dt;
@@ -233,17 +251,20 @@ function update(dt){
   player.slashTimer=Math.max(0,player.slashTimer-dt);
 
   state.spawnTimer-=dt;
-  if(state.spawnTimer<=0 && state.enemies.length<3){
+  if(state.spawnTimer<=0&&state.enemies.length<3){
     spawnEnemy();
     state.spawnTimer=120;
   }
 
   for(let i=state.enemies.length-1;i>=0;i--){
     const e=state.enemies[i];
-    enemyAI(e);
+    enemyAI(e,dt);
+    e.jumpCd=Math.max(0,e.jumpCd-dt);
+
     e.vy+=world.gravity*dt;
     e.x+=e.vx*dt;
     e.y+=e.vy*dt;
+
     resolvePlatforms(e,dt);
 
     if(e.hp<=0){
@@ -313,11 +334,7 @@ function drawPlayer(){
   ctx.save();
   ctx.translate(player.x+player.w/2,player.y+player.h/2);
   ctx.scale(player.facing,1);
-  ctx.drawImage(
-    ASSETS.knight,
-    0,0,32,32,
-    -16*s,-16*s,32*s,32*s
-  );
+  ctx.drawImage(ASSETS.knight,0,0,32,32,-16*s,-16*s,32*s,32*s);
   ctx.restore();
 }
 
