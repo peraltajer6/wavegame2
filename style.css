@@ -38,6 +38,12 @@ body {
   font-size: 18px;
 }
 
+.name {
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+/* BUTTON */
 .pixel-btn {
   font-family: Pixel, monospace;
   font-size: 28px;
@@ -53,17 +59,21 @@ body {
   background: #3046a8;
 }
 
-.controls {
-  margin-top: 30px;
-}
-
-.box-row {
+/* SELECT LAYOUT */
+.select-row {
   display: flex;
   justify-content: center;
-  gap: 50px;
+  gap: 80px;
   margin-top: 50px;
 }
 
+.select-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* PIXEL BOX */
 .pixel-box {
   width: 160px;
   height: 200px;
@@ -73,7 +83,6 @@ body {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  position: relative;
 }
 
 .pixel-box:hover {
@@ -81,11 +90,9 @@ body {
   transform: scale(1.05);
 }
 
-.box-label {
-  position: absolute;
-  bottom: -34px;
-  font-family: Pixel, monospace;
-  font-size: 18px;
+/* CONTROLS */
+.controls {
+  margin-top: 30px;
 }
 
 canvas {
