@@ -8,7 +8,6 @@ const ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 
 const playBtn = document.getElementById("playBtn");
-
 const characterBoxes = document.querySelectorAll("[data-char]");
 const weaponBoxes = document.querySelectorAll("[data-weapon]");
 
@@ -52,25 +51,23 @@ weaponBoxes.forEach(box => {
   };
 });
 
-/* FULLSCREEN CANVAS RESIZE */
+/* TRUE FULLSCREEN CANVAS */
 function resizeCanvas() {
-  const dpr = window.devicePixelRatio || 1;
-
-  canvas.width = Math.floor(window.innerWidth * dpr);
-  canvas.height = Math.floor(window.innerHeight * dpr);
-
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
 
 window.addEventListener("resize", resizeCanvas);
 
-/* GAME START (EMPTY BASE) */
+/* GAME START (TEMP VISUAL CONFIRMATION) */
 function startGame() {
-  console.log("GAME STARTED");
-  console.log("Character:", playerData.character);
-  console.log("Weapon:", playerData.weapon);
-
-  // placeholder background so you SEE the play area
   ctx.fillStyle = "#1a234d";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "24px monospace";
+  ctx.fillText("FULLSCREEN GAME ACTIVE", 40, 60);
+
+  console.log("Character:", playerData.character);
+  console.log("Weapon:", playerData.weapon);
 }
