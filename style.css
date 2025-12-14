@@ -1,0 +1,77 @@
+@font-face {
+  font-family: 'Pixel';
+  src: local('Courier New');
+}
+
+body {
+  margin: 0;
+  background: #0b1020;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.screen {
+  text-align: center;
+  color: white;
+}
+
+.hidden {
+  display: none;
+}
+
+.pixel {
+  font-family: Pixel, monospace;
+  letter-spacing: 2px;
+}
+
+.big {
+  font-size: 64px;
+}
+
+.small {
+  font-size: 20px;
+}
+
+.tiny {
+  font-size: 14px;
+}
+
+.pixel-btn {
+  font-family: Pixel, monospace;
+  font-size: 28px;
+  padding: 12px 40px;
+  background: #1e2a5a;
+  color: white;
+  border: 3px solid white;
+  cursor: pointer;
+  margin: 20px 0;
+}
+
+.pixel-btn:hover {
+  background: #3046a8;
+}
+
+.choices {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 40px;
+}
+
+.choice {
+  font-family: Pixel, monospace;
+  font-size: 22px;
+  padding: 20px 30px;
+  border: 3px solid white;
+  cursor: pointer;
+}
+
+.choice:hover {
+  background: #3046a8;
+}
+
+canvas {
+  border: 3px solid white;
+}
