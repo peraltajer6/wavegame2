@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pixel Warrior</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- START SCREEN -->
+  <div id="startScreen" class="screen">
+    <h1 class="pixel big">WELCOME</h1>
+    <button id="playBtn" class="pixel-btn">PLAY</button>
+    <p class="pixel small">CONTROLS</p>
+    <p class="pixel tiny">
+      ARROWS – MOVE<br>
+      Z – ATTACK<br>
+      X – SPECIAL
+    </p>
+  </div>
+
+  <!-- CHARACTER SELECT -->
+  <div id="characterScreen" class="screen hidden">
+    <h1 class="pixel">CHOOSE YOUR CHARACTER</h1>
+    <div class="choices">
+      <div class="choice" data-char="boy">BOY WARRIOR</div>
+      <div class="choice" data-char="girl">GIRL WARRIOR</div>
+    </div>
+  </div>
+
+  <!-- WEAPON SELECT -->
+  <div id="weaponScreen" class="screen hidden">
+    <h1 class="pixel">CHOOSE YOUR WEAPON</h1>
+    <div class="choices">
+      <div class="choice" data-weapon="sword">BASIC SWORD</div>
+      <div class="choice" data-weapon="dagger">BASIC DAGGER</div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loadingScreen" class="screen hidden">
+    <h1 class="pixel">STARTING...</h1>
+  </div>
+
+  <!-- GAME (EMPTY FOR NOW) -->
+  <canvas id="game" width="960" height="540" class="hidden"></canvas>
+
+  <script src="game.js"></script>
+</body>
+</html>
