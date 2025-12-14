@@ -16,6 +16,11 @@ body {
   height: 100vh;
 }
 
+/* when game starts */
+body.game-active {
+  display: block;
+}
+
 .screen {
   text-align: center;
   color: white;
@@ -59,6 +64,11 @@ body {
   background: #3046a8;
 }
 
+/* CONTROLS */
+.controls {
+  margin-top: 30px;
+}
+
 /* SELECT LAYOUT */
 .select-row {
   display: flex;
@@ -90,11 +100,12 @@ body {
   transform: scale(1.05);
 }
 
-/* CONTROLS */
-.controls {
-  margin-top: 30px;
-}
-
-canvas {
-  border: 4px solid white;
+/* FULLSCREEN CANVAS */
+.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  image-rendering: pixelated;
 }
