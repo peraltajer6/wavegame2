@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Pixel Warrior</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -11,29 +11,46 @@
   <div id="startScreen" class="screen">
     <h1 class="pixel big">WELCOME</h1>
     <button id="playBtn" class="pixel-btn">PLAY</button>
-    <p class="pixel small">CONTROLS</p>
-    <p class="pixel tiny">
+
+    <div class="controls pixel small">
+      CONTROLS<br><br>
       ARROWS – MOVE<br>
       Z – ATTACK<br>
       X – SPECIAL
-    </p>
+    </div>
   </div>
 
   <!-- CHARACTER SELECT -->
   <div id="characterScreen" class="screen hidden">
     <h1 class="pixel">CHOOSE YOUR CHARACTER</h1>
-    <div class="choices">
-      <div class="choice" data-char="boy">BOY WARRIOR</div>
-      <div class="choice" data-char="girl">GIRL WARRIOR</div>
+
+    <div class="box-row">
+      <div class="pixel-box" data-char="boy">
+        <!-- YOU WILL PUT BOY IMAGE HERE -->
+        <span class="box-label">BOY</span>
+      </div>
+
+      <div class="pixel-box" data-char="girl">
+        <!-- YOU WILL PUT GIRL IMAGE HERE -->
+        <span class="box-label">GIRL</span>
+      </div>
     </div>
   </div>
 
   <!-- WEAPON SELECT -->
   <div id="weaponScreen" class="screen hidden">
     <h1 class="pixel">CHOOSE YOUR WEAPON</h1>
-    <div class="choices">
-      <div class="choice" data-weapon="sword">BASIC SWORD</div>
-      <div class="choice" data-weapon="dagger">BASIC DAGGER</div>
+
+    <div class="box-row">
+      <div class="pixel-box" data-weapon="sword">
+        <!-- SWORD IMAGE -->
+        <span class="box-label">SWORD</span>
+      </div>
+
+      <div class="pixel-box" data-weapon="dagger">
+        <!-- DAGGER IMAGE -->
+        <span class="box-label">DAGGER</span>
+      </div>
     </div>
   </div>
 
@@ -42,7 +59,7 @@
     <h1 class="pixel">STARTING...</h1>
   </div>
 
-  <!-- GAME (EMPTY FOR NOW) -->
+  <!-- GAME CANVAS (LATER) -->
   <canvas id="game" width="960" height="540" class="hidden"></canvas>
 
   <script src="game.js"></script>
