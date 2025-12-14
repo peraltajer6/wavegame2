@@ -108,8 +108,20 @@ body.game-active {
   transform: scale(1.05);
 }
 
-/* CHARACTER IMAGE (FIXED) */
+/* CHARACTER IMAGE */
 .char-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+
+  image-rendering: pixelated;
+  pointer-events: none;
+  display: block;
+}
+
+/* WEAPON IMAGE */
+.weapon-img {
   max-width: 100%;
   max-height: 100%;
   width: auto;
