@@ -14,13 +14,11 @@ const playerData = {
   weapon: null
 };
 
-// START → CHARACTER
 playBtn.onclick = () => {
   startScreen.classList.add("hidden");
   characterScreen.classList.remove("hidden");
 };
 
-// CHARACTER → WEAPON
 characterBoxes.forEach(box => {
   box.onclick = () => {
     playerData.character = box.dataset.char;
@@ -29,7 +27,6 @@ characterBoxes.forEach(box => {
   };
 });
 
-// WEAPON → LOADING → GAME
 weaponBoxes.forEach(box => {
   box.onclick = () => {
     playerData.weapon = box.dataset.weapon;
