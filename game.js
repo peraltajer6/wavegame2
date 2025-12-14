@@ -1,40 +1,38 @@
-// SCREENS
 const startScreen = document.getElementById("startScreen");
 const characterScreen = document.getElementById("characterScreen");
 const weaponScreen = document.getElementById("weaponScreen");
 const loadingScreen = document.getElementById("loadingScreen");
 const canvas = document.getElementById("game");
 
-// BUTTONS
 const playBtn = document.getElementById("playBtn");
-const characterChoices = document.querySelectorAll("[data-char]");
-const weaponChoices = document.querySelectorAll("[data-weapon]");
 
-// PLAYER SETUP (saved for later gameplay)
+const characterBoxes = document.querySelectorAll("[data-char]");
+const weaponBoxes = document.querySelectorAll("[data-weapon]");
+
 const playerData = {
   character: null,
   weapon: null
 };
 
-// START → CHARACTER SELECT
+// START → CHARACTER
 playBtn.onclick = () => {
   startScreen.classList.add("hidden");
   characterScreen.classList.remove("hidden");
 };
 
-// CHARACTER SELECT → WEAPON SELECT
-characterChoices.forEach(choice => {
-  choice.onclick = () => {
-    playerData.character = choice.dataset.char;
+// CHARACTER → WEAPON
+characterBoxes.forEach(box => {
+  box.onclick = () => {
+    playerData.character = box.dataset.char;
     characterScreen.classList.add("hidden");
     weaponScreen.classList.remove("hidden");
   };
 });
 
-// WEAPON SELECT → LOADING → GAME
-weaponChoices.forEach(choice => {
-  choice.onclick = () => {
-    playerData.weapon = choice.dataset.weapon;
+// WEAPON → LOADING → GAME
+weaponBoxes.forEach(box => {
+  box.onclick = () => {
+    playerData.weapon = box.dataset.weapon;
     weaponScreen.classList.add("hidden");
     loadingScreen.classList.remove("hidden");
 
@@ -46,11 +44,7 @@ weaponChoices.forEach(choice => {
   };
 });
 
-// GAME START (EMPTY FOR NOW)
 function startGame() {
-  console.log("GAME STARTED");
-  console.log("CHARACTER:", playerData.character);
-  console.log("WEAPON:", playerData.weapon);
-
-  // later: initialize player, enemies, waves, etc.
+  console.log("Character:", playerData.character);
+  console.log("Weapon:", playerData.weapon);
 }
