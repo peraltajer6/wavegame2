@@ -1,6 +1,10 @@
 @font-face {
-  font-family: 'Pixel';
-  src: local('Courier New');
+  font-family: Pixel;
+  src: local("Courier New");
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
@@ -31,11 +35,7 @@ body {
 }
 
 .small {
-  font-size: 20px;
-}
-
-.tiny {
-  font-size: 14px;
+  font-size: 18px;
 }
 
 .pixel-btn {
@@ -44,7 +44,7 @@ body {
   padding: 12px 40px;
   background: #1e2a5a;
   color: white;
-  border: 3px solid white;
+  border: 4px solid white;
   cursor: pointer;
   margin: 20px 0;
 }
@@ -53,25 +53,41 @@ body {
   background: #3046a8;
 }
 
-.choices {
+.controls {
+  margin-top: 30px;
+}
+
+.box-row {
   display: flex;
   justify-content: center;
-  gap: 40px;
-  margin-top: 40px;
+  gap: 50px;
+  margin-top: 50px;
 }
 
-.choice {
-  font-family: Pixel, monospace;
-  font-size: 22px;
-  padding: 20px 30px;
-  border: 3px solid white;
+.pixel-box {
+  width: 160px;
+  height: 200px;
+  border: 4px solid white;
+  background: #1a234d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
+  position: relative;
 }
 
-.choice:hover {
+.pixel-box:hover {
   background: #3046a8;
+  transform: scale(1.05);
+}
+
+.box-label {
+  position: absolute;
+  bottom: -34px;
+  font-family: Pixel, monospace;
+  font-size: 18px;
 }
 
 canvas {
-  border: 3px solid white;
+  border: 4px solid white;
 }
