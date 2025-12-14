@@ -24,15 +24,19 @@
   <div id="characterScreen" class="screen hidden">
     <h1 class="pixel">CHOOSE YOUR CHARACTER</h1>
 
-    <div class="box-row">
-      <div class="pixel-box" data-char="boy">
-        <!-- YOU WILL PUT BOY IMAGE HERE -->
-        <span class="box-label">BOY</span>
+    <div class="select-row">
+      <div class="select-col">
+        <div class="pixel name">BOY</div>
+        <div class="pixel-box" data-char="boy">
+          <!-- BOY IMAGE GOES HERE -->
+        </div>
       </div>
 
-      <div class="pixel-box" data-char="girl">
-        <!-- YOU WILL PUT GIRL IMAGE HERE -->
-        <span class="box-label">GIRL</span>
+      <div class="select-col">
+        <div class="pixel name">GIRL</div>
+        <div class="pixel-box" data-char="girl">
+          <!-- GIRL IMAGE GOES HERE -->
+        </div>
       </div>
     </div>
   </div>
@@ -41,15 +45,19 @@
   <div id="weaponScreen" class="screen hidden">
     <h1 class="pixel">CHOOSE YOUR WEAPON</h1>
 
-    <div class="box-row">
-      <div class="pixel-box" data-weapon="sword">
-        <!-- SWORD IMAGE -->
-        <span class="box-label">SWORD</span>
+    <div class="select-row">
+      <div class="select-col">
+        <div class="pixel name">SWORD</div>
+        <div class="pixel-box" data-weapon="sword">
+          <!-- SWORD IMAGE -->
+        </div>
       </div>
 
-      <div class="pixel-box" data-weapon="dagger">
-        <!-- DAGGER IMAGE -->
-        <span class="box-label">DAGGER</span>
+      <div class="select-col">
+        <div class="pixel name">DAGGER</div>
+        <div class="pixel-box" data-weapon="dagger">
+          <!-- DAGGER IMAGE -->
+        </div>
       </div>
     </div>
   </div>
@@ -59,7 +67,7 @@
     <h1 class="pixel">STARTING...</h1>
   </div>
 
-  <!-- GAME CANVAS (LATER) -->
+  <!-- GAME -->
   <canvas id="game" width="960" height="540" class="hidden"></canvas>
 
   <script src="game.js"></script>
